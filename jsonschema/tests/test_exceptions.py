@@ -310,7 +310,7 @@ class TestErrorInitReprStr(TestCase):
             instance=5,
             schema={"type": "string"},
         )
-        defaults.update(kwargs)
+        defaults |= kwargs
         return exceptions.ValidationError(**defaults)
 
     def assertShows(self, expected, **kwargs):
@@ -471,5 +471,5 @@ class TestErrorInitReprStr(TestCase):
 
 class TestHashable(TestCase):
     def test_hashable(self):
-        set([exceptions.ValidationError("")])
-        set([exceptions.SchemaError("")])
+        {exceptions.ValidationError("")}
+        {exceptions.SchemaError("")}

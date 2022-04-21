@@ -47,11 +47,7 @@ def additionalProperties(validator, aP, instance, schema):
             yield from validator.descend(instance[extra], aP, path=extra)
     elif not aP and extras:
         if "patternProperties" in schema:
-            if len(extras) == 1:
-                verb = "does"
-            else:
-                verb = "do"
-
+            verb = "does" if len(extras) == 1 else "do"
             joined = ", ".join(repr(each) for each in sorted(extras))
             patterns = ", ".join(
                 repr(each) for each in sorted(schema["patternProperties"])
@@ -278,7 +274,7 @@ def dependentSchemas(validator, dependentSchemas, instance, schema):
 
 
 def enum(validator, enums, instance, schema):
-    if instance == 0 or instance == 1:
+    if instance in [0, 1]:
         unbooled = unbool(instance)
         if all(unbooled != unbool(each) for each in enums):
             yield ValidationError(f"{instance!r} is not one of {enums!r}")
@@ -310,10 +306,13 @@ def dynamicRef(validator, dynamicRef, instance, schema):
                     and fragment == subschema["$dynamicAnchor"]):
                 scope_stack = list(validator.resolver._scopes_stack)
                 scope_stack.reverse()
-                extended_schema = dynamic_anchor_extender(
-                    validator, scope_stack, fragment, schema, subschema,
-                )
-                if extended_schema:
+                if extended_schema := dynamic_anchor_extender(
+                    validator,
+                    scope_stack,
+                    fragment,
+                    schema,
+                    subschema,
+                ):
                     yield from validator.descend(instance, extended_schema)
                     break
 
@@ -399,11 +398,11 @@ def oneOf(validator, oneOf, instance, schema):
             context=all_errors,
         )
 
-    more_valid = [
-        each for _, each in subschemas
+    if more_valid := [
+        each
+        for _, each in subschemas
         if validator.evolve(schema=each).is_valid(instance)
-    ]
-    if more_valid:
+    ]:
         more_valid.append(first_valid)
         reprs = ", ".join(repr(schema) for schema in more_valid)
         yield ValidationError(f"{instance!r} is valid under each of {reprs}")
@@ -429,11 +428,11 @@ def unevaluatedItems(validator, unevaluatedItems, instance, schema):
     evaluated_item_indexes = find_evaluated_item_indexes_by_schema(
         validator, instance, schema,
     )
-    unevaluated_items = [
-        item for index, item in enumerate(instance)
+    if unevaluated_items := [
+        item
+        for index, item in enumerate(instance)
         if index not in evaluated_item_indexes
-    ]
-    if unevaluated_items:
+    ]:
         error = "Unevaluated items are not allowed (%s %s unexpected)"
         yield ValidationError(error % extras_msg(unevaluated_items))
 
@@ -445,13 +444,15 @@ def unevaluatedProperties(validator, unevaluatedProperties, instance, schema):
     unevaluated_property_keys = []
     for property in instance:
         if property not in evaluated_property_keys:
-            for _ in validator.descend(
-                instance[property],
-                unevaluatedProperties,
-                path=property,
-                schema_path=property,
-            ):
-                unevaluated_property_keys.append(property)
+            unevaluated_property_keys.extend(
+                property
+                for _ in validator.descend(
+                    instance[property],
+                    unevaluatedProperties,
+                    path=property,
+                    schema_path=property,
+                )
+            )
 
     if unevaluated_property_keys:
         error = "Unevaluated properties are not allowed (%s %s unexpected)"

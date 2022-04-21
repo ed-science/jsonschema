@@ -34,12 +34,10 @@ def fake_validator(*errors):
             pass
 
         def iter_errors(self, instance):
-            if errors:
-                return errors.pop()
-            return []  # pragma: no cover
+            return errors.pop() if errors else []
 
         @classmethod
-        def check_schema(self, schema):
+        def check_schema(cls, schema):
             pass
 
     return FakeValidator
@@ -326,11 +324,9 @@ class TestCLI(TestCase):
         self.assertOutputs(
             files=dict(some_schema=json.dumps(schema)),
             argv=["--output", "pretty", "some_schema"],
-
             exit_code=1,
             stderr=(
-                "===[SchemaError]===(some_schema)===\n\n"
-                + str(error)
+                ("===[SchemaError]===(some_schema)===\n\n" + error)
                 + "\n-----------------------------\n"
             ),
         )
@@ -356,11 +352,9 @@ class TestCLI(TestCase):
         self.assertOutputs(
             files=dict(some_schema=json.dumps(schema)),
             argv=["--output", "pretty", "some_schema"],
-
             exit_code=1,
             stderr=(
-                "===[SchemaError]===(some_schema)===\n\n"
-                + str(error)
+                ("===[SchemaError]===(some_schema)===\n\n" + error)
                 + "\n-----------------------------\n"
             ),
         )
@@ -396,11 +390,9 @@ class TestCLI(TestCase):
                 some_instance=json.dumps(instance),
             ),
             argv=["--output", "pretty", "-i", "some_instance", "some_schema"],
-
             exit_code=1,
             stderr=(
-                "===[SchemaError]===(some_schema)===\n\n"
-                + str(error)
+                ("===[SchemaError]===(some_schema)===\n\n" + error)
                 + "\n-----------------------------\n"
             ),
         )
@@ -707,8 +699,10 @@ class TestCLI(TestCase):
         self.assertOutputs(
             files=dict(some_schema=schema, some_instance="1"),
             argv=[
-                "-i", "some_instance",
-                "--base-uri", ref_path.parent.as_uri() + "/",
+                "-i",
+                "some_instance",
+                "--base-uri",
+                f"{ref_path.parent.as_uri()}/",
                 "some_schema",
             ],
             stdout="",
@@ -727,8 +721,10 @@ class TestCLI(TestCase):
         self.assertOutputs(
             files=dict(some_schema=schema, some_instance='"1"'),
             argv=[
-                "-i", "some_instance",
-                "--base-uri", ref_path.parent.as_uri() + "/",
+                "-i",
+                "some_instance",
+                "--base-uri",
+                f"{ref_path.parent.as_uri()}/",
                 "some_schema",
             ],
             exit_code=1,

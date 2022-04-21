@@ -410,10 +410,9 @@ class TestValidationErrorMessages(TestCase):
         )
         self.assertEqual(
             message,
-            "{} does not match any of the regexes: {}, {}".format(
-                repr("zebra"), repr("^abc$"), repr("^def$"),
-            ),
+            f'{repr("zebra")} does not match any of the regexes: {repr("^abc$")}, {repr("^def$")}',
         )
+
         message = self.message_for(
             instance={"zebra": 123, "fish": 456},
             schema=schema,
@@ -421,9 +420,7 @@ class TestValidationErrorMessages(TestCase):
         )
         self.assertEqual(
             message,
-            "{}, {} do not match any of the regexes: {}, {}".format(
-                repr("fish"), repr("zebra"), repr("^abc$"), repr("^def$"),
-            ),
+            f'{repr("fish")}, {repr("zebra")} do not match any of the regexes: {repr("^abc$")}, {repr("^def$")}',
         )
 
     def test_False_schema(self):
@@ -1523,7 +1520,7 @@ class ValidatorTestMixin(MetaSchemaTestsMixin, object):
             elif value == "bad":
                 raise bad
             else:  # pragma: no cover
-                self.fail("What is {}? [Baby Don't Hurt Me]".format(value))
+                self.fail(f"What is {value}? [Baby Don't Hurt Me]")
 
         validator = self.Validator(
             {"format": "foo"}, format_checker=checker,
@@ -2042,7 +2039,7 @@ class TestRefResolver(TestCase):
             self.addCleanup(os.remove, tempf.name)
             json.dump({"foo": "bar"}, tempf)
 
-        ref = "file://{}#foo".format(pathname2url(tempf.name))
+        ref = f"file://{pathname2url(tempf.name)}#foo"
         with self.resolver.resolving(ref) as resolved:
             self.assertEqual(resolved, "bar")
 
@@ -2156,7 +2153,7 @@ class ReallyFakeRequests(object):
     def get(self, url):
         response = self._responses.get(url)
         if url is None:  # pragma: no cover
-            raise ValueError("Unknown URL: " + repr(url))
+            raise ValueError(f"Unknown URL: {repr(url)}")
         return _ReallyFakeJSONResponse(json.dumps(response))
 
 

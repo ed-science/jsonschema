@@ -118,10 +118,7 @@ class _Error(Exception):
     def json_path(self):
         path = "$"
         for elem in self.absolute_path:
-            if isinstance(elem, int):
-                path += "[" + str(elem) + "]"
-            else:
-                path += "." + elem
+            path += f"[{str(elem)}]" if isinstance(elem, int) else f".{elem}"
         return path
 
     def _set(self, **kwargs):
@@ -134,7 +131,7 @@ class _Error(Exception):
             "message", "cause", "context", "validator", "validator_value",
             "path", "schema_path", "instance", "schema", "parent",
         )
-        return dict((attr, getattr(self, attr)) for attr in attrs)
+        return {attr: getattr(self, attr) for attr in attrs}
 
 
 class ValidationError(_Error):

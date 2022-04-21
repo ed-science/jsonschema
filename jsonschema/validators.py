@@ -91,9 +91,7 @@ def _id_of(schema):
     """
     Return the ID of a schema for recent JSON Schema drafts.
     """
-    if schema is True or schema is False:
-        return ""
-    return schema.get("$id", "")
+    return "" if schema is True or schema is False else schema.get("$id", "")
 
 
 def _store_schema_list():
@@ -365,7 +363,7 @@ def extend(
     """
 
     all_validators = dict(validator.VALIDATORS)
-    all_validators.update(validators)
+    all_validators |= validators
 
     if type_checker is None:
         type_checker = validator.TYPE_CHECKER

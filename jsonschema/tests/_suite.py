@@ -104,8 +104,7 @@ class Version(object):
 
     def optional_tests_of(self, name):
         return self._tests_in(
-            subject=name,
-            path=self._path.joinpath("optional", name + ".json"),
+            subject=name, path=self._path.joinpath("optional", f"{name}.json")
         )
 
     def to_unittest_testcase(self, *suites, **kwargs):
@@ -161,7 +160,7 @@ class _Test(object):
     comment = attr.ib(default=None)
 
     def __repr__(self):  # pragma: no cover
-        return "<Test {}>".format(self.fully_qualified_name)
+        return f"<Test {self.fully_qualified_name}>"
 
     @property
     def fully_qualified_name(self):  # pragma: no cover
@@ -177,11 +176,7 @@ class _Test(object):
     @property
     def method_name(self):
         delimiters = r"[\W\- ]+"
-        return "test_{}_{}_{}".format(
-            re.sub(delimiters, "_", self.subject),
-            re.sub(delimiters, "_", self.case_description),
-            re.sub(delimiters, "_", self.description),
-        )
+        return f'test_{re.sub(delimiters, "_", self.subject)}_{re.sub(delimiters, "_", self.case_description)}_{re.sub(delimiters, "_", self.description)}'
 
     def to_unittest_method(self, skip=lambda test: None, **kwargs):
         if self.valid:

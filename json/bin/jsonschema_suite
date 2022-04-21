@@ -41,8 +41,7 @@ def groups(paths):
     Each test group within each file in the provided paths.
     """
     for test_file in files(paths):
-        for group in test_file:
-            yield group
+        yield from test_file
 
 
 def cases(paths):
@@ -67,12 +66,12 @@ def collect(root_dir):
 class SanityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        print("Looking for tests in %s" % SUITE_ROOT_DIR)
-        print("Looking for remotes in %s" % REMOTES_DIR)
+        print(f"Looking for tests in {SUITE_ROOT_DIR}")
+        print(f"Looking for remotes in {REMOTES_DIR}")
         cls.test_files = list(collect(SUITE_ROOT_DIR))
         cls.remote_files = list(collect(REMOTES_DIR))
-        print("Found %s test files" % len(cls.test_files))
-        print("Found %s remote files" % len(cls.remote_files))
+        print(f"Found {len(cls.test_files)} test files")
+        print(f"Found {len(cls.remote_files)} remote files")
         assert cls.test_files, "Didn't find the test files!"
         assert cls.remote_files, "Didn't find the remote files!"
 
@@ -82,7 +81,7 @@ class SanityTests(unittest.TestCase):
                 try:
                     json.load(test_file)
                 except ValueError as error:
-                    self.fail("%s contains invalid JSON (%s)" % (path, error))
+                    self.fail(f"{path} contains invalid JSON ({error})")
 
     def test_all_remote_files_are_valid_json(self):
         for path in self.remote_files:
@@ -90,7 +89,7 @@ class SanityTests(unittest.TestCase):
                 try:
                     json.load(remote_file)
                 except ValueError as error:
-                    self.fail("%s contains invalid JSON (%s)" % (path, error))
+                    self.fail(f"{path} contains invalid JSON ({error})")
 
     def test_all_descriptions_have_reasonable_length(self):
         for case in cases(self.test_files):
@@ -105,7 +104,7 @@ class SanityTests(unittest.TestCase):
 
     def test_all_descriptions_are_unique(self):
         for group in groups(self.test_files):
-            descriptions = set(test["description"] for test in group["tests"])
+            descriptions = {test["description"] for test in group["tests"]}
             self.assertEqual(
                 len(descriptions),
                 len(group["tests"]),
@@ -122,10 +121,9 @@ class SanityTests(unittest.TestCase):
                     try:
                         schema_validator.check_schema(case["schema"])
                     except jsonschema.SchemaError as error:
-                        self.fail("%s contains an invalid schema (%s)" %
-                                  (case, error))
+                        self.fail(f"{case} contains an invalid schema ({error})")
             else:
-                warnings.warn("No schema validator for %s" % schema)
+                warnings.warn(f"No schema validator for {schema}")
 
     @unittest.skipIf(jsonschema is None, "Validation library not present!")
     def test_suites_are_valid(self):

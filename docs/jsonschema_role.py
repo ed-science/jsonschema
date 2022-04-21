@@ -51,11 +51,9 @@ def fetch_or_load(spec_path):
     """
 
     headers = {
-        "User-Agent": "python-jsonschema v{} - documentation build v{}".format(
-            metadata.version("jsonschema"),
-            __version__,
-        ),
+        "User-Agent": f'python-jsonschema v{metadata.version("jsonschema")} - documentation build v{__version__}'
     }
+
 
     with suppress(FileNotFoundError):
         modified = datetime.utcfromtimestamp(os.path.getmtime(spec_path))
